@@ -1,0 +1,45 @@
+GETs
+Todas as marcas cadastradas
+curl -v http://localhost:8080/brands
+
+Todos os carros cadastrados
+curl -v http://localhost:8080/cars
+
+Marca cadastrada, id=n 
+curl -v http://localhost:8080/brand?id=1
+
+Carro cadastrado, id=n 
+curl -v http://localhost:8080/car?id=1
+
+POSTs
+Cadastrar marcas description=nome
+curl -d '{"description":"Chevrolet"}' -H "Content-type: application/json" -X POST http://localhost:8080/brand/insert
+
+Cadastrar carros com marcas que existem ou não a=marca, b=modelo, c=cor
+curl -d '{"brand":"Chevrolet", "model":"Cruze", "color":"white"}' -H "Content-type: application/json" -X POST http://localhost:8080/car/insert
+
+Cadastrar carros com marcas que existem usando o id da marca
+curl -d '{"brand":2, "model":"Teste", "color":"qualquer"}' -H "Content-type: application/json" -X POST http://localhost:8080/car/insertId
+
+DELETEs
+Remover marcas por id
+curl -d '{"id":1}' -H "Content-type: application/json" -X DELETE http://localhost:8080/brand/remove
+
+Remover carros por id
+curl -d '{"id":1}' -H "Content-type: application/json" -X DELETE http://localhost:8080/car/remove
+
+PATCHs // Atualiza só um atributo
+Alterar descrição de marca pelo id
+curl -d '{"id":6, "attribName":"description", "attribValue":"MARCA CORINGA"}' -H "Content-type: application/json" -X PATCH http://localhost:8080/brand/update
+
+Alterar cor/modelo/marca de carro pelo id
+curl -d '{"id":1, "attribName":"color", "attribValue":"COR DE TESTE"}' -H "Content-type: application/json" -X PATCH http://localhost:8080/car/update
+
+PUTs // Atualiza tudo no objeto
+Altera atributos do objeto brand (exceto id) do id passado
+curl -X PUT http://localhost:8080/brand/modify/6/BRANDTESTE
+
+Altera atributos do objeto car (exceto id) do id passado (n=brandId)
+curl -X PUT http://localhost:8080/car/modify/7/BRANDID/BRANDTESTE/MODELOTESTE/CORTESTE
+
+
