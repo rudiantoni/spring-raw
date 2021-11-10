@@ -3,9 +3,7 @@ package com.example.demospringraw.repository;
 import com.example.demospringraw.dao.FileMgmt;
 import com.example.demospringraw.dto.DTOUpdateAttrib;
 import com.example.demospringraw.entity.Brand;
-import org.springframework.http.ResponseEntity;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class BrandRepository {
@@ -48,7 +46,9 @@ public class BrandRepository {
             // Não existe objeto com o id passado
 
             if (brand.getId() < nextBrandId) {
-                String errMsg = "Invalid brand id. Must be at least "+nextBrandId+ ". Brand insert aborted.";
+                // ID passado menor que o próximo
+                String errMsg = "Invalid brand id. Must be at least " + nextBrandId + ". Brand insert aborted.";
+
                 System.out.println(errMsg);
                 throw new Exception(errMsg);
 
@@ -105,18 +105,6 @@ public class BrandRepository {
         removeBrandById(id, true);
     }
 
-    public static String getBrands(String delimiter){
-        StringBuilder message = new StringBuilder();
-        for (Brand brand : brandsList) {
-            message.append("id: ").append(brand.getId()).append(" description: ").append(brand.getDescription());
-
-            if(brand.getId() != nextBrandId - 1) {
-                message.append(delimiter);
-            }
-        }
-        return message.toString();
-    }
-
     public static ArrayList<Brand> getBrandsList(){
         return brandsList;
     }
@@ -145,25 +133,8 @@ public class BrandRepository {
         return null;
     }
 
-    public static Brand getBrand(String description) {
-        for (Brand brand : brandsList) {
-
-            if(description.equals(brand.getDescription())) {
-                return brand;
-            }
-        }
-
-        return null;
-    }
-
     public static boolean brandExists(int brandId) {
         Brand brand = getBrand(brandId);
-
-        return brand != null;
-    }
-
-    public static boolean brandExists(String brandDescription) {
-        Brand brand = getBrand(brandDescription);
 
         return brand != null;
     }
@@ -210,20 +181,26 @@ public class BrandRepository {
         }
     }
 
-    public static Brand modifyBrand(int id, Brand brand) throws IOException {
+    public static Brand modifyBrand(int id, Brand brand) throws Exception {
         return modifyBrand(id, brand, true);
     }
-    public static Brand modifyBrand(int id, Brand brand, boolean saveOnDatabase) throws IOException {
+
+    public static Brand modifyBrand(int id, Brand brand, boolean saveOnDatabase) throws Exception {
         Brand modifyBrand = getBrand(id);
 
         if (modifyBrand == null) {
-            System.out.println("Brand with id " + id + " not found. Brand modify aborted.");
-            return null;
+            String errMsg = "Brand with id " + id + " not found. Brand modify aborted.";
+
+            System.out.println(errMsg);
+            throw new Exception(errMsg);
         }
 
         if (brand.getDescription() == null) {
-            System.out.println("Invalid sent attribute. Attribute description is required. Brand modify aborted.");
-            return null;
+            String errMsg = "Invalid sent attribute. Attribute description is required. Brand modify aborted.";
+
+            System.out.println(errMsg);
+            throw new Exception(errMsg);
+
         } else {
 
             modifyBrand.setDescription(brand.getDescription());

@@ -1,6 +1,7 @@
 package com.example.demospringraw.dao;
 
 import com.example.demospringraw.entity.Brand;
+import com.example.demospringraw.entity.Car;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ public class FileMgmt {
     public static final int CAR_COLUMN_BRANDID = 1;
     public static final int CAR_COLUMN_MODEL = 2;
     public static final int CAR_COLUMN_COLOR = 3;
+    public static final String[] CAR_COLUMNS = {"id", "brandId", "model", "color"};
 
     private static final String DATABASE_BRAND = "./data/bd_brand.csv";
     private static final String DATABASE_CAR = "./data/bd_car.csv";
@@ -31,11 +33,12 @@ public class FileMgmt {
     public static ArrayList<ArrayList<String>> getSavedBrands() throws IOException {
 
         ArrayList<ArrayList<String>> fileContent = getFileContents(DATABASE_BRAND, false);
-/*        System.out.println("linhas: " + fileContent.size());
 
-        for (ArrayList<String> arr: fileContent) {
-            System.out.println("colunas: " +arr.size() + " " + arr);
-        }*/
+        return fileContent;
+    }
+
+    public static ArrayList<ArrayList<String>> getSavedCars() throws IOException {
+        ArrayList<ArrayList<String>> fileContent = getFileContents(DATABASE_CAR, false);
 
         return fileContent;
     }
@@ -50,8 +53,16 @@ public class FileMgmt {
             // Se o arquivo CSV não existir, criá-lo e adicionar os cabeçalhos das colunas
             FileWriter fWriter = new FileWriter(dataFile);
 
-            fWriter.append(BRAND_COLUMNS[BRAND_COLUMN_ID] + CSV_DELIMITER);
-            fWriter.append(BRAND_COLUMNS[BRAND_COLUMN_DESCRIPTION] + CSV_DELIMITER);
+            if (dataFile == DATABASE_BRAND) {
+                fWriter.append(BRAND_COLUMNS[BRAND_COLUMN_ID] + CSV_DELIMITER);
+                fWriter.append(BRAND_COLUMNS[BRAND_COLUMN_DESCRIPTION] + CSV_DELIMITER);
+            } else if (dataFile == DATABASE_CAR){
+                fWriter.append(CAR_COLUMNS[CAR_COLUMN_ID] + CSV_DELIMITER);
+                fWriter.append(CAR_COLUMNS[CAR_COLUMN_BRANDID] + CSV_DELIMITER);
+                fWriter.append(CAR_COLUMNS[CAR_COLUMN_MODEL] + CSV_DELIMITER);
+                fWriter.append(CAR_COLUMNS[CAR_COLUMN_COLOR] + CSV_DELIMITER);
+            }
+
             fWriter.append("\n");
 
             fWriter.flush();
@@ -89,6 +100,15 @@ public class FileMgmt {
         insertRow(DATABASE_BRAND, id + CSV_DELIMITER + description + CSV_DELIMITER);
     }
 
+    public static void saveCar(Car car) throws IOException {
+        int id = car.getId();
+        int brandId = car.getBrandId();
+        String model = car.getModel();
+        String color = car.getColor();
+
+        insertRow(DATABASE_CAR, id + CSV_DELIMITER + brandId + CSV_DELIMITER + model + CSV_DELIMITER + color + CSV_DELIMITER);
+    }
+
     public static void insertRow(String dataFile, String dataRow) throws IOException {
 
         File csvFile = new File(dataFile);
@@ -115,6 +135,22 @@ public class FileMgmt {
         }
 
         overwriteFile(DATABASE_BRAND, outputStr);
+    }
+
+    public static void saveCars(ArrayList<Car> carsList) throws IOException {
+        String columns = CAR_COLUMNS[CAR_COLUMN_ID] + CSV_DELIMITER;
+        columns += CAR_COLUMNS[CAR_COLUMN_BRANDID] + CSV_DELIMITER;
+        columns += CAR_COLUMNS[CAR_COLUMN_MODEL] + CSV_DELIMITER;
+        columns += CAR_COLUMNS[CAR_COLUMN_COLOR] + CSV_DELIMITER;
+
+        String outputStr = columns + "\n";
+
+        for (int i = 0; i < carsList.size(); i++){
+            if (carsList.get(i) != null)
+                outputStr += getLineStrFromCar(carsList.get(i)) + "\n";
+        }
+
+        overwriteFile(DATABASE_CAR, outputStr);
     }
 
     public static void overwriteFile(String fileName, String fileContent) throws IOException {
@@ -145,4 +181,10 @@ public class FileMgmt {
     public static String getLineStrFromBrand(Brand brand) {
         return brand.getId() + CSV_DELIMITER + brand.getDescription() + CSV_DELIMITER;
     }
+
+    public static String getLineStrFromCar(Car car) {
+        return car.getId() + CSV_DELIMITER + car.getBrandId() + CSV_DELIMITER +
+                car.getModel() + CSV_DELIMITER + car.getColor() + CSV_DELIMITER;
+    }
+
 }

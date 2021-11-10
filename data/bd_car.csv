@@ -1,9 +1,8 @@
 id;brandId;model;color;
-1;1;Modelo Qualquer1;Cor Qualquer1;
-2;1;Modelo Qualquer2;Cor Qualquer2;
-3;1;Modelo Qualquer3;Cor Qualquer3;
-4;1;Modelo Qualquer4;Cor Qualquer4;
-5;1;Modelo Qualquer5;Cor Qualquer5;
-6;1;Modelo Qualquer6;Cor Qualquer6;
-7;1;Modelo Qualquer7;Cor Qualquer7;
-8;1;Modelo Qualquer8;Cor Qualquer8;
+1;1;Corolla;Cinza;
+2;2;Civic;Branco;
+3;3;Sentra;Prata;
+4;4;Gol;Azul;
+6;2;Camaro;Verde;
+7;9;Gallardo;Preto;
+8;8;Gallardo;Preto;

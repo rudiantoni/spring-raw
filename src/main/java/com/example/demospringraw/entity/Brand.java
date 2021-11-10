@@ -6,8 +6,7 @@ public class Brand {
     private int id = BRAND_NO_ID;
     private String description;
 
-
-    public Brand() {}
+    public Brand () {}
 
     public Brand(int id, String description) {
         this.id = id;

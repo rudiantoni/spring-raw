@@ -1,54 +1,89 @@
 package com.example.demospringraw.repository;
 
-import com.example.demospringraw.entity.Brand;
+import com.example.demospringraw.dao.FileMgmt;
+import com.example.demospringraw.dto.DTOUpdateAttrib;
 import com.example.demospringraw.entity.Car;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class CarRepository {
 
     private static int nextCarId = 1;
-    private static ArrayList<Car> carsList = new ArrayList<>();
+    private static final ArrayList<Car> carsList = new ArrayList<>();
 
-    // OK Inserir Carro com o brandId
-    public static Car insertCar(int brandId, String model, String color){
-        if (!BrandRepository.brandExists(brandId)) {
-            // Cancelar se não existir um objeto Brand no ArrayList com esse ID
-            return null;
-        }
-        Car car = new Car(nextCarId, brandId, model, color);
-
-        carsList.add(car);
-
-        nextCarId++;
-
-        System.out.println("Registered new car: id: " + car.getId() + " brand id: " + car.getBrandId() + " brand description: " + BrandRepository.getBrand(car.getBrandId()).getDescription()  + " model: " + car.getModel() + " color: " + car.getColor());
-
-        return car;
+    public static Car insertCar(Car car) throws Exception {
+        return insertCar(car, true, false);
     }
 
-    // OK Inserir Carro com o nome e inserir brand se nao existir o nome
-    public static Car insertCar(String brandName, String model, String color) throws Exception {
-        int registerBrandId;
+    public static Car insertCar(Car car, boolean saveOnDatabase, boolean isLoading) throws Exception {
+        if (car.getBrandId() == Car.CAR_NO_BRANDID || car.getModel() == null || car.getColor() == null) {
+            String errMsg = "Invalid sent attributes. Attributes brandId, model and color are required. Car insert aborted.";
 
-        if (!BrandRepository.brandExists(brandName)) {
-            // Adicionar um novo objeto Brand caso não exista nenhum com o brandName passado
-
-            //registerBrandId = BrandRepository.insertBrand(brandName).getId();
-            Brand newBrand = new Brand(brandName);
-            registerBrandId = BrandRepository.insertBrand(newBrand).getId();
-
-        } else {
-            registerBrandId = BrandRepository.getBrand(brandName).getId();
+            System.out.println(errMsg);
+            throw new Exception(errMsg);
         }
 
-        return insertCar(registerBrandId, model, color);
+        if (!isLoading) {
+            if (!BrandRepository.brandExists(car.getBrandId())) {
+                String errMsg = "Invalid brandId: " + car.getBrandId() + ". Car insert aborted.";
+
+                System.out.println(errMsg);
+                throw new Exception(errMsg);
+            }
+        }
+
+        int newCarId = Car.CAR_NO_ID;
+        // Objeto sem id passado
+        if (car.getId() == Car.CAR_NO_ID) {
+            // Objeto novo sem id passado
+
+            newCarId = nextCarId;
+
+        } else if (getCar(car.getId()) != null) {
+            // JA existe objeto com o id passado.
+            String errMsg = "Car with id " + car.getId() + " already exists. Car insert aborted.";
+
+            System.out.println(errMsg);
+            throw new Exception(errMsg);
+
+        } else if (getCar(car.getId()) == null) {
+            // Não existe objeto com o id passado
+
+            if (car.getId() < nextCarId) {
+                // ID passado menor que o próximo
+
+                System.out.println("ID:" + car.getId());
+                System.out.println(nextCarId);
+
+                String errMsg = "Invalid car id. Must be at least " + nextCarId + ". Car insert aborted.";
+
+                System.out.println(errMsg);
+                throw new Exception(errMsg);
+
+            } else {
+                newCarId = car.getId();
+            }
+        }
+
+        Car newCar = new Car(newCarId, car.getBrandId(), car.getModel(), car.getColor());
+
+        carsList.add(newCar);
+
+        if (saveOnDatabase) {
+            FileMgmt.saveCar(newCar);
+        }
+
+        nextCarId = newCar.getId() + 1;
+
+        System.out.println("Car inserted successfully: id: " + newCar.getId()
+                + " brandId: " + newCar.getBrandId() + " model: " + newCar.getModel()
+                + " color: " + newCar.getColor() + ".");
+
+        return newCar;
     }
 
-    public static void removeCarById(int id) {
+    public static void removeCarById(int id, boolean saveOnDatabase) throws Exception {
 
-        System.out.println("ENTROU");
         int removeId = -1;
         for (int i = 0; i < carsList.size(); i++) {
             if (carsList.get(i).getId() == id) {
@@ -58,33 +93,40 @@ public class CarRepository {
         }
 
         if (removeId > -1) {
-            System.out.println("Removed car: id: " + carsList.get(removeId).getId() +
-                    " brand id: " + carsList.get(removeId).getBrandId() +
-                    " brand description: " + BrandRepository.getBrand(carsList.get(removeId).getBrandId()).getDescription() +
-                    " model: " + carsList.get(removeId).getModel() + " color: " + carsList.get(removeId).getColor());
-
+            System.out.println("Car removed successfully: id: " + carsList.get(removeId).getId() +
+                    " brand id: " + carsList.get(removeId).getBrandId() + "" +
+                    " model: " + carsList.get(removeId).getModel() + " color: " + carsList.get(removeId).getColor() + ".");
             carsList.remove(removeId);
+
+            if(saveOnDatabase) {
+                FileMgmt.saveCars(carsList);
+            }
+        } else {
+            String errMsg = "Car with id " + id + " not found. Car remove aborted.";
+            System.out.println(errMsg);
+
+            throw new Exception(errMsg);
         }
     }
 
-    public static String getCars(String delimiter){
-        String message = "";
-        for (Car car : carsList) {
-            message += "id: " + car.getId();
-            message += "brandId: " + car.getBrandId();
-            message += " model: " +car.getModel();
-            message += " color: " +car.getColor();
-
-            message += "brandId: " + car.getBrandId();
-            if(car.getId() != nextCarId - 1) {
-                message += delimiter;
-            }
-        }
-        return message;
+    public static void removeCarById(int id) throws Exception {
+        removeCarById(id, true);
     }
 
     public static ArrayList<Car> getCarsList() {
         return carsList;
+    }
+
+    public static Car searchCar(int carId) throws Exception {
+        if (getCar(carId) != null) {
+            return getCar(carId);
+        }
+        else{
+            String errMsg = "Car with id " + carId + " not found.";
+            System.out.println(errMsg);
+
+            throw new Exception(errMsg);
+        }
     }
 
     public static Car getCar(int id) {
@@ -98,63 +140,124 @@ public class CarRepository {
         return null;
     }
 
-    public static Car getCar(String model) {
-        for (Car car : carsList) {
-
-            if(model.equals(car.getModel())) {
-                return car;
-            }
-        }
-
-        return null;
+    public static Car updateCar(int carId, DTOUpdateAttrib updateObj) throws Exception {
+        return updateCar(carId, updateObj, true);
     }
 
-    public static void updateCar(int carId, String attribName, String attribValue) {
+    public static Car updateCar(int carId, DTOUpdateAttrib updateObj, boolean saveOnDatabase) throws Exception {
         Car car = getCar(carId);
-        boolean canShowMessage = false;
-        if (car == null) return;
 
-        if (attribName.equals("model")) {
-            car.setModel(attribValue);
-            canShowMessage = true;
+        if (car == null) {
+            String errMsg ="Car with id " + carId + " not found. Car update aborted.";
 
-        } else if (attribName.equals("color")) {
-            car.setColor(attribValue);
-            canShowMessage = true;
+            System.out.println(errMsg);
+            throw new Exception(errMsg);
 
-        } else if (attribName.equals("brand")) {
-            BrandRepository.getBrand(car.getBrandId()).setDescription(attribValue);
-            canShowMessage = true;
+        }
 
-        } else if (attribName.equals("brandId")) {
-            if  (BrandRepository.brandExists(Integer.parseInt(attribValue))) {
-                car.setBrandId(Integer.parseInt(attribValue));
-                canShowMessage = true;
+        if (updateObj.attribName == null || updateObj.attribValue == null) {
+            String errMsg = "Invalid attribName or attribValue. Both are required. Car update aborted.";
+
+            System.out.println(errMsg);
+            throw new Exception(errMsg);
+        }
+
+        if (updateObj.attribName.equals("brandId")) {
+            if (BrandRepository.brandExists(Integer.parseInt(updateObj.attribValue))) {
+                car.setBrandId(Integer.parseInt(updateObj.attribValue));
+
+            } else {
+                String errMsg ="Invalid brandId: " + updateObj.attribValue + ". Car update aborted.";
+
+                System.out.println(errMsg);
+                throw new Exception(errMsg);
             }
+
+        } else if (updateObj.attribName.equals("model")) {
+            car.setModel(updateObj.attribValue);
+
+        } else if (updateObj.attribName.equals("color")) {
+            car.setColor(updateObj.attribValue);
+
+        } else {
+            String errMsg = "Car at id " + carId + " invalid attribute " + updateObj.attribName
+                    + ". Car update aborted.";
+
+            System.out.println(errMsg);
+            throw new Exception(errMsg);
         }
 
-        if (canShowMessage){
-            System.out.println("Changed car object attribute at id: " + carId +
-                    " attribute name: " + attribName + " attribute value: " + attribValue);
+
+        System.out.println("Car updated successfully: id: " + car.getId() +
+                " attribute name: " + updateObj.attribName + " attribute value: " + updateObj.attribValue + ".");
+
+        if (saveOnDatabase){
+            FileMgmt.saveCars(carsList);
         }
+
+        return car;
+
     }
 
-    public static void modifyCar(int id, String brandName, String model, String color, String brandId) {
-        Car car = getCar(id);
+    public static Car modifyCar(int id, Car car) throws Exception {
+        return modifyCar(id, car, true);
+    }
+    public static Car modifyCar(int id, Car car, boolean saveOnDatabase) throws Exception {
+        Car modifyCar = getCar(id);
 
-        if (car == null) return;
+        if (modifyCar == null) {
+            String errMsg = "Car with id " + id + " not found. Car modify aborted.";
 
-        if (!BrandRepository.brandExists(Integer.parseInt(brandId))) return;
+            System.out.println(errMsg);
+            throw new Exception(errMsg);
+        }
 
-        BrandRepository.getBrand(car.getBrandId()).setDescription(brandName);
-        car.setModel(model);
-        car.setColor(color);
-        car.setBrandId(Integer.parseInt(brandId));
+        if (car.getBrandId() == Car.CAR_NO_BRANDID || car.getModel() == null || car.getColor() == null ) {
+            String errMsg = "Invalid sent attributes. Attributes brandId, model and color are required. Car modify aborted.";
 
-        System.out.println("Modified whole car object attribute at id: " + car.getId() +
-                " brand id: " + car.getBrandId() +
-                " brand description: " + BrandRepository.getBrand(car.getBrandId()).getDescription() +
-                " model: " + car.getModel() +
-                " color: "+ car.getColor());
+            System.out.println(errMsg);
+            throw new Exception(errMsg);
+
+        } else if (!BrandRepository.brandExists(car.getBrandId())) {
+            String errMsg ="Invalid brandId: " + car.getBrandId() + ". Car modify aborted.";
+
+            System.out.println(errMsg);
+            throw new Exception(errMsg);
+        } else {
+
+            modifyCar.setBrandId(car.getBrandId());
+            modifyCar.setModel(car.getModel());
+            modifyCar.setColor(car.getColor());
+
+            System.out.println("Car successfully modified: id: " + modifyCar.getId() +
+                    " brandId: " + modifyCar.getBrandId() + " model: " +modifyCar.getModel() +
+                    " color: " + modifyCar.getColor() + ".");
+
+            if (saveOnDatabase) {
+                FileMgmt.saveCars(carsList);
+            }
+
+            return modifyCar;
+        }
+
+    }
+
+
+    public static void loadSavedCars() throws Exception {
+
+        ArrayList<ArrayList<String>> savedCars = FileMgmt.getSavedCars();
+
+        if (savedCars == null) return;
+
+        for (ArrayList<String> rowData: savedCars) {
+
+            int id = Integer.parseInt(rowData.get(FileMgmt.CAR_COLUMN_ID));
+            int brandId = Integer.parseInt(rowData.get(FileMgmt.CAR_COLUMN_BRANDID));
+            String model = rowData.get(FileMgmt.CAR_COLUMN_MODEL);
+            String color = rowData.get(FileMgmt.CAR_COLUMN_COLOR);
+
+            Car car = new Car(id, brandId, model, color);
+            insertCar(car, false, true);
+        }
     }
 }

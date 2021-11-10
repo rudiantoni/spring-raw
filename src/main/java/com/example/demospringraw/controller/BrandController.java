@@ -6,7 +6,6 @@ import com.example.demospringraw.repository.BrandRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -14,6 +13,7 @@ import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 @RestController
+@CrossOrigin
 public class BrandController {
 
     @RequestMapping(value="/brands", method = GET)

@@ -1,17 +1,19 @@
 package com.example.demospringraw.controller;
 
-import com.example.demospringraw.dto.DTOInsertCar;
 import com.example.demospringraw.dto.DTOUpdateAttrib;
 import com.example.demospringraw.entity.Car;
 import com.example.demospringraw.repository.CarRepository;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 @RestController
+@CrossOrigin
 public class CarController {
 
     @RequestMapping(value="/cars", method = GET)
@@ -19,51 +21,69 @@ public class CarController {
         return CarRepository.getCarsList();
     }
 
-    // Usar /cars/{id} com @PathVariable
-    @RequestMapping(value="/car", method = GET)
-    public Car getCar(@RequestParam("id") int id) {
-        return CarRepository.getCar(id);
-    }
-
-    @RequestMapping(value="/car/insert", method = POST)
-    public Car insertCar(
-            @RequestBody() DTOInsertCar obj
-    ) throws Exception {
-        return CarRepository.insertCar(obj.brand, obj.model, obj.color);
-    }
-
-    @RequestMapping(value="/car/insertId", method = POST)
-    public Car insertCarId(
-            @RequestBody() DTOInsertCar obj
+    @RequestMapping(value="/cars/{id}", method = GET)
+    public Object getCar(
+            @PathVariable("id") int id
     ) {
-        return CarRepository.insertCar(obj.brandId, obj.model, obj.color);
+        try {
+            return CarRepository.searchCar(id);
+        } catch (Exception e) {
+            return ResponseEntity.status(BAD_REQUEST).body(e.getMessage());
+        }
     }
 
-    @RequestMapping(value="/car/remove", method = DELETE)
-    public void removeCar(
-            @RequestBody() Car obj
+    @RequestMapping(value="/cars", method = POST)
+    public Object insertCar(
+            @RequestBody() Car car
     ) {
-        CarRepository.removeCarById(obj.getId());
+        try {
+            return CarRepository.insertCar(car);
+        } catch (Exception e) {
+            return ResponseEntity.status(BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @RequestMapping(value="/cars/{id}", method = DELETE)
+    public Object removeBrand(
+            @PathVariable("id") int id
+    ) {
+        try {
+            CarRepository.removeCarById(id);
+            return ResponseEntity.status(OK).body("");
+        } catch (Throwable e) {
+            return ResponseEntity.status(BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     // PATCH: Atualiza um atributo do objeto
-    @RequestMapping(value="/car/update", method = PATCH)
-    public void updateCar(
-            @RequestBody() DTOUpdateAttrib obj
+    // Convencionado: retorna o objeto inteiro atualizado.
+    // Convencionado: inclui no corpo o nome do atributo e o valor.
+    @RequestMapping(value="/cars/{id}", method = PATCH)
+    public Object updateCar(
+            @PathVariable("id") int id,
+            @RequestBody() DTOUpdateAttrib updateObj
     ) {
-        CarRepository.updateCar(obj.id, obj.attribName, obj.attribValue);
+        try {
+            return CarRepository.updateCar(id, updateObj);
+        } catch (Throwable e) {
+            return ResponseEntity.status(BAD_REQUEST).body(e.getMessage());
+        }
+
     }
 
     // PUT: Atualiza o objeto inteiro
-    @RequestMapping(value="/car/modify/{id}/{brandId}/{brandName}/{model}/{color}", method = PUT)
-    public void modifyCar(
+    // Convencionado: retorna O objeto inteiro atualizado.
+    // Convencionado: inclui no corpo cada atributo a ser atualizado e seu valor.
+    @RequestMapping(value="/cars/{id}", method = PUT)
+    public Object modifyCar(
             @PathVariable("id") int id,
-            @PathVariable("brandId") String brandId,
-            @PathVariable("brandName") String brandName,
-            @PathVariable("model") String model,
-            @PathVariable("color") String color
+            @RequestBody() Car car
     ) {
-        CarRepository.modifyCar(id, brandName, model, color, brandId);
+        try {
+            return CarRepository.modifyCar(id, car);
+        } catch (Throwable e) {
+            return ResponseEntity.status(BAD_REQUEST).body(e.getMessage());
+        }
     }
 
 }
