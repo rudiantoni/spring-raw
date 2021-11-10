@@ -28,7 +28,7 @@ public class CarController {
     @RequestMapping(value="/car/insert", method = POST)
     public Car insertCar(
             @RequestBody() DTOInsertCar obj
-    ) throws IOException {
+    ) throws Exception {
         return CarRepository.insertCar(obj.brand, obj.model, obj.color);
     }
 

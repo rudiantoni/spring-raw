@@ -18,10 +18,12 @@ public class BrandRepository {
     // insertBrand(brand) salva no BD
     // insertBrand(brand, true) salva no BD
     // insertBrand(brand, false) não salva no BD
-    public static Brand insertBrand(Brand brand, boolean saveOnDatabase) throws IOException {
+    public static Brand insertBrand(Brand brand, boolean saveOnDatabase) throws Exception {
         if (brand.getDescription() == null) {
-            System.out.println("Invalid brand description. Brand insert aborted.");
-            return null;
+            String errMsg = "Invalid brand description. Brand insert aborted.";
+            System.out.println(errMsg);
+
+            throw new Exception(errMsg);
         }
 
         /*System.out.println(brand.getDescription());
@@ -37,15 +39,19 @@ public class BrandRepository {
 
         } else if (getBrand(brand.getId()) != null) {
             // JA existe objeto com o id passado.
-            System.out.println("Brand with id " + brand.getId() + " already exists. Brand insert aborted.");
-            return null;
+            String errMsg = "Brand with id " + brand.getId() + " already exists. Brand insert aborted.";
+
+            System.out.println(errMsg);
+            throw new Exception(errMsg);
 
         } else if (getBrand(brand.getId()) == null) {
             // Não existe objeto com o id passado
 
             if (brand.getId() < nextBrandId) {
-                System.out.println("Invalid brand id. Must be at least "+nextBrandId+ ". Brand insert aborted.");
-                return null;
+                String errMsg = "Invalid brand id. Must be at least "+nextBrandId+ ". Brand insert aborted.";
+                System.out.println(errMsg);
+                throw new Exception(errMsg);
+
             } else {
                 newBrandId = brand.getId();
             }
@@ -66,11 +72,11 @@ public class BrandRepository {
         return newBrand;
     }
 
-    public static Brand insertBrand(Brand brand) throws IOException {
+    public static Brand insertBrand(Brand brand) throws Exception {
         return insertBrand(brand, true);
     }
 
-    public static void removeBrandById(int id, boolean saveOnDatabase) throws IOException {
+    public static void removeBrandById(int id, boolean saveOnDatabase) throws Exception {
         int removeId = -1;
         for (int i = 0; i < brandsList.size(); i++) {
             if (brandsList.get(i).getId() == id) {
@@ -87,12 +93,15 @@ public class BrandRepository {
                 FileMgmt.saveBrands(brandsList);
             }
         } else {
-            System.out.println("Brand with id " + id + " not found. Brand remove aborted.");
+            String errMsg = "Brand with id " + id + " not found. Brand remove aborted.";
+            System.out.println(errMsg);
+
+            throw new Exception(errMsg);
         }
 
     }
 
-    public static void removeBrandById(int id) throws IOException {
+    public static void removeBrandById(int id) throws Exception {
         removeBrandById(id, true);
     }
 
@@ -112,13 +121,15 @@ public class BrandRepository {
         return brandsList;
     }
 
-    public static Brand searchBrand(int brandId) {
+    public static Brand searchBrand(int brandId) throws Exception {
         if (getBrand(brandId) != null) {
             return getBrand(brandId);
         }
         else{
-            System.out.println("Brand with id " +brandId+ " not found.");
-            return null;
+            String errMsg = "Brand with id " + brandId + " not found.";
+            System.out.println(errMsg);
+
+            throw new Exception(errMsg);
         }
     }
 
@@ -157,21 +168,27 @@ public class BrandRepository {
         return brand != null;
     }
 
-    public static Brand updateBrand(int brandId, DTOUpdateAttrib updateObj) throws IOException {
+    public static Brand updateBrand(int brandId, DTOUpdateAttrib updateObj) throws Exception {
         return updateBrand(brandId, updateObj, true);
     }
 
-    public static Brand updateBrand(int brandId, DTOUpdateAttrib updateObj, boolean saveOnDatabase) throws IOException {
+    public static Brand updateBrand(int brandId, DTOUpdateAttrib updateObj, boolean saveOnDatabase) throws Exception {
         Brand brand = getBrand(brandId);
 
         if (brand == null) {
-            System.out.println("Brand with id " + brandId + " not found. Brand update aborted.");
-            return null;
+            String errMsg ="Brand with id " + brandId + " not found. Brand update aborted.";
+
+            System.out.println(errMsg);
+            throw new Exception(errMsg);
+
         }
 
         if (updateObj.attribName == null || updateObj.attribValue == null) {
-            System.out.println("Invalid attribName or attribValue. Both are required. Brand update aborted.");
-            return null;
+            String errMsg = "Invalid attribName or attribValue. Both are required. Brand update aborted.";
+
+            System.out.println(errMsg);
+            throw new Exception(errMsg);
+
         }
 
         if (updateObj.attribName.equals("description")) {
@@ -184,10 +201,12 @@ public class BrandRepository {
 
             return brand;
         } else {
-            System.out.println("Brand at id " + brandId + " attribute " + updateObj.attribName
-                    + " don't exist. Brand update aborted.");
+            String errMsg = "Brand at id " + brandId + " invalid attribute " + updateObj.attribName
+                    + ". Brand update aborted.";
 
-            return null;
+            System.out.println(errMsg);
+            throw new Exception(errMsg);
+
         }
     }
 
@@ -221,7 +240,7 @@ public class BrandRepository {
 
     }
 
-    public static void loadSavedBrands() throws IOException {
+    public static void loadSavedBrands() throws Exception {
 
         ArrayList<ArrayList<String>> savedBrands = FileMgmt.getSavedBrands();
 

@@ -29,7 +29,7 @@ public class CarRepository {
     }
 
     // OK Inserir Carro com o nome e inserir brand se nao existir o nome
-    public static Car insertCar(String brandName, String model, String color) throws IOException {
+    public static Car insertCar(String brandName, String model, String color) throws Exception {
         int registerBrandId;
 
         if (!BrandRepository.brandExists(brandName)) {
