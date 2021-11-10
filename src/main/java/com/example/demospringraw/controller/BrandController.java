@@ -1,10 +1,11 @@
 package com.example.demospringraw.controller;
 
 import com.example.demospringraw.entity.Brand;
-import com.example.demospringraw.dto.UpdateDataDTO;
+import com.example.demospringraw.dto.DTOUpdateAttrib;
 import com.example.demospringraw.repository.BrandRepository;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import static org.springframework.web.bind.annotation.RequestMethod.*;
@@ -17,37 +18,54 @@ public class BrandController {
         return BrandRepository.getBrandsList();
     }
 
-    @RequestMapping(value="/brand", method = GET)
-    public Brand getBrand(@RequestParam("id") int id) {
-        return BrandRepository.getBrand(id);
+    @RequestMapping(value="/brands/{id}", method = GET)
+    public Brand getBrand(
+            @PathVariable("id") int id
+    ) {
+        return BrandRepository.searchBrand(id);
     }
 
-    @RequestMapping(value="/brand/insert", method = POST)
+    @RequestMapping(value="/brands", method = POST)
     public Brand insertBrand(
-            @RequestBody() Brand obj
-    ) {
-        return BrandRepository.insertBrand(obj.getDescription());
+            @RequestBody() Brand brand
+    ) throws IOException {
+        return BrandRepository.insertBrand(brand);
+
+        // Admite apenas description.
+        // Adminite id válido e description.
+        // Chamar só a brand, salva no DB
+        // Chamar brand com true salva no DB
+        // Chamar brand com false NÃO salva no DB
     }
 
-    @RequestMapping(value="/brand/remove", method = DELETE)
+    @RequestMapping(value="/brands/{id}", method = DELETE)
     public void removeBrand(
-            @RequestBody() Brand obj
-    ) {
-        BrandRepository.removeBrandById(obj.getId());
+            @PathVariable("id") int id
+    ) throws IOException {
+        BrandRepository.removeBrandById(id);
     }
 
-    @RequestMapping(value="/brand/update", method = PATCH)
-    public void updateBrand(
-            @RequestBody() UpdateDataDTO obj
-    ) {
-        BrandRepository.updateBrand(obj.id, obj.attribName, obj.attribValue);
-    }
-
-    @RequestMapping(value="/brand/modify/{id}/{description}", method = PUT)
-    public void modifyBrand(
+    // PATCH: Atualiza um atributo do objeto
+    // Convencionado: retorna o objeto inteiro atualizado.
+    // Convencionado: inclui no corpo o nome do atributo e o valor.
+    @RequestMapping(value="/brands/{id}", method = PATCH)
+    public Brand updateBrand(
             @PathVariable("id") int id,
-            @PathVariable("description") String description
-    ) {
-        BrandRepository.modifyBrand(id, description);
+            @RequestBody() DTOUpdateAttrib updateObj
+    ) throws IOException {
+        //BrandRepository.updateBrand(id, obj.attribName, obj.attribValue); // Passa objeto inteiro
+        return BrandRepository.updateBrand(id, updateObj);
+    }
+
+    // PUT: Atualiza o objeto inteiro
+    // Convencionado: retorna O objeto inteiro atualizado.
+    // Convencionado: inclui no corpo cada atributo a ser atualizado e seu valor.
+    @RequestMapping(value="/brands/{id}", method = PUT)
+    public Brand modifyBrand(
+            @PathVariable("id") int id,
+            @RequestBody () Brand brand
+    ) throws IOException {
+        //BrandRepository.modifyBrand(id, brand.getDescription());
+        return BrandRepository.modifyBrand(id, brand);
     }
 }

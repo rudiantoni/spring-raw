@@ -1,7 +1,11 @@
 package com.example.demospringraw.repository;
 
+import com.example.demospringraw.dao.FileMgmt;
+import com.example.demospringraw.dto.DTOUpdateAttrib;
 import com.example.demospringraw.entity.Brand;
+import org.springframework.http.ResponseEntity;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class BrandRepository {
@@ -10,17 +14,63 @@ public class BrandRepository {
     private static final ArrayList<Brand> brandsList = new ArrayList<>();
 
     // OK Inserir Marca
-    public static Brand insertBrand(String description){
-        Brand brand = new Brand(nextBrandId, description);
+    // Overload
+    // insertBrand(brand) salva no BD
+    // insertBrand(brand, true) salva no BD
+    // insertBrand(brand, false) não salva no BD
+    public static Brand insertBrand(Brand brand, boolean saveOnDatabase) throws IOException {
+        if (brand.getDescription() == null) {
+            System.out.println("Invalid brand description. Brand insert aborted.");
+            return null;
+        }
 
-        brandsList.add(brand);
+        /*System.out.println(brand.getDescription());
+        System.out.println(brand.getId());*/
 
-        nextBrandId++;
-        System.out.println("Registered new brand: id: " + brand.getId() + " description: " + brand.getDescription());
-        return brand;
+        int newBrandId = Brand.BRAND_NO_ID;
+
+        // Objeto sem id passado
+        if (brand.getId() == Brand.BRAND_NO_ID) {
+            // Objeto novo sem id passado
+
+            newBrandId = nextBrandId;
+
+        } else if (getBrand(brand.getId()) != null) {
+            // JA existe objeto com o id passado.
+            System.out.println("Brand with id " + brand.getId() + " already exists. Brand insert aborted.");
+            return null;
+
+        } else if (getBrand(brand.getId()) == null) {
+            // Não existe objeto com o id passado
+
+            if (brand.getId() < nextBrandId) {
+                System.out.println("Invalid brand id. Must be at least "+nextBrandId+ ". Brand insert aborted.");
+                return null;
+            } else {
+                newBrandId = brand.getId();
+            }
+        }
+
+        Brand newBrand = new Brand(newBrandId, brand.getDescription());
+
+        brandsList.add(newBrand);
+
+        if (saveOnDatabase) {
+            FileMgmt.saveBrand(newBrand);
+        }
+
+        nextBrandId = newBrand.getId() + 1;
+
+        System.out.println("Brand inserted successfully: id: " + newBrand.getId() + " description: " + newBrand.getDescription() + ".");
+
+        return newBrand;
     }
 
-    public static void removeBrandById(int id) {
+    public static Brand insertBrand(Brand brand) throws IOException {
+        return insertBrand(brand, true);
+    }
+
+    public static void removeBrandById(int id, boolean saveOnDatabase) throws IOException {
         int removeId = -1;
         for (int i = 0; i < brandsList.size(); i++) {
             if (brandsList.get(i).getId() == id) {
@@ -30,9 +80,20 @@ public class BrandRepository {
         }
 
         if (removeId > -1) {
-            System.out.println("Removed brand: id: " + brandsList.get(removeId).getId() + " brand description: " + brandsList.get(removeId).getDescription());
+            System.out.println("Brand removed successfully: id: " + brandsList.get(removeId).getId() + " brand description: " + brandsList.get(removeId).getDescription() + ".");
             brandsList.remove(removeId);
+
+            if(saveOnDatabase) {
+                FileMgmt.saveBrands(brandsList);
+            }
+        } else {
+            System.out.println("Brand with id " + id + " not found. Brand remove aborted.");
         }
+
+    }
+
+    public static void removeBrandById(int id) throws IOException {
+        removeBrandById(id, true);
     }
 
     public static String getBrands(String delimiter){
@@ -49,6 +110,16 @@ public class BrandRepository {
 
     public static ArrayList<Brand> getBrandsList(){
         return brandsList;
+    }
+
+    public static Brand searchBrand(int brandId) {
+        if (getBrand(brandId) != null) {
+            return getBrand(brandId);
+        }
+        else{
+            System.out.println("Brand with id " +brandId+ " not found.");
+            return null;
+        }
     }
 
     public static Brand getBrand(int id) {
@@ -86,27 +157,82 @@ public class BrandRepository {
         return brand != null;
     }
 
-    public static void updateBrand(int brandId, String attribName, String attribValue) {
+    public static Brand updateBrand(int brandId, DTOUpdateAttrib updateObj) throws IOException {
+        return updateBrand(brandId, updateObj, true);
+    }
+
+    public static Brand updateBrand(int brandId, DTOUpdateAttrib updateObj, boolean saveOnDatabase) throws IOException {
         Brand brand = getBrand(brandId);
 
-        if (brand == null) return;
+        if (brand == null) {
+            System.out.println("Brand with id " + brandId + " not found. Brand update aborted.");
+            return null;
+        }
 
-        if (attribName.equals("description")) {
-            brand.setDescription(attribValue);
-            System.out.println("Changed brand object attribute at id: " + brand.getId() +
-                    "attribute name: " + attribName + " attribute value: " + brand.getDescription());
+        if (updateObj.attribName == null || updateObj.attribValue == null) {
+            System.out.println("Invalid attribName or attribValue. Both are required. Brand update aborted.");
+            return null;
+        }
+
+        if (updateObj.attribName.equals("description")) {
+            brand.setDescription(updateObj.attribValue);
+            System.out.println("Brand updated successfully: id: " + brand.getId() +
+                    " attribute name: " + updateObj.attribName + " attribute value: " + updateObj.attribValue);
+            if (saveOnDatabase) {
+                FileMgmt.saveBrands(brandsList);
+            }
+
+            return brand;
+        } else {
+            System.out.println("Brand at id " + brandId + " attribute " + updateObj.attribName
+                    + " don't exist. Brand update aborted.");
+
+            return null;
         }
     }
 
-    public static void modifyBrand(int id, String description) {
-        Brand brand = getBrand(id);
+    public static Brand modifyBrand(int id, Brand brand) throws IOException {
+        return modifyBrand(id, brand, true);
+    }
+    public static Brand modifyBrand(int id, Brand brand, boolean saveOnDatabase) throws IOException {
+        Brand modifyBrand = getBrand(id);
 
-        if (brand == null) return;
+        if (modifyBrand == null) {
+            System.out.println("Brand with id " + id + " not found. Brand modify aborted.");
+            return null;
+        }
 
-        brand.setDescription(description);
+        if (brand.getDescription() == null) {
+            System.out.println("Invalid sent attribute. Attribute description is required. Brand modify aborted.");
+            return null;
+        } else {
 
-        System.out.println("Modified whole brand object attribute at id: " + brand.getId() +
-                " description: " + brand.getDescription());
+            modifyBrand.setDescription(brand.getDescription());
+
+            System.out.println("Brand successfully modified: id: " + modifyBrand.getId() +
+                    " description: " + modifyBrand.getDescription() + ".");
+
+            if (saveOnDatabase) {
+                FileMgmt.saveBrands(brandsList);
+            }
+
+            return modifyBrand;
+        }
+
     }
 
+    public static void loadSavedBrands() throws IOException {
+
+        ArrayList<ArrayList<String>> savedBrands = FileMgmt.getSavedBrands();
+
+        if (savedBrands == null) return;
+
+        for (ArrayList<String> rowData: savedBrands) {
+            int id = Integer.parseInt(rowData.get(FileMgmt.BRAND_COLUMN_ID));
+            String description = rowData.get(FileMgmt.BRAND_COLUMN_DESCRIPTION);
+
+            Brand brand = new Brand(id, description);
+            insertBrand(brand, false);
+        }
+    }
 }

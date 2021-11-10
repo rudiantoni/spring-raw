@@ -1,8 +1,9 @@
 package com.example.demospringraw.dto;
 
-public class AddCarDTO {
+public class DTOInsertCar {
 
-    public int brand;
+    public int brandId;
+    public String brand;
     public String model;
     public String color;
 

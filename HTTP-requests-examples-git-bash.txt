@@ -6,7 +6,7 @@ Todos os carros cadastrados
 curl -v http://localhost:8080/cars
 
 Marca cadastrada, id=n 
-curl -v http://localhost:8080/brand?id=1
+curl -v http://localhost:8080/brands/{id}
 
 Carro cadastrado, id=n 
 curl -v http://localhost:8080/car?id=1

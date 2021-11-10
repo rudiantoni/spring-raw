@@ -1,6 +1,6 @@
 package com.example.demospringraw.dto;
 
-public class UpdateDataDTO {
+public class DTOUpdateAttrib {
 
     public int id;
     public String attribName;

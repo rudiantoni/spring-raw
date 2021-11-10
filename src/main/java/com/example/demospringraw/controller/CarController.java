@@ -1,14 +1,12 @@
 package com.example.demospringraw.controller;
 
-import com.example.demospringraw.dto.AddCarDTO;
-import com.example.demospringraw.dto.InsertCarDTO;
-import com.example.demospringraw.dto.UpdateDataDTO;
-import com.example.demospringraw.entity.Brand;
+import com.example.demospringraw.dto.DTOInsertCar;
+import com.example.demospringraw.dto.DTOUpdateAttrib;
 import com.example.demospringraw.entity.Car;
-import com.example.demospringraw.repository.BrandRepository;
 import com.example.demospringraw.repository.CarRepository;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import static org.springframework.web.bind.annotation.RequestMethod.*;
@@ -21,6 +19,7 @@ public class CarController {
         return CarRepository.getCarsList();
     }
 
+    // Usar /cars/{id} com @PathVariable
     @RequestMapping(value="/car", method = GET)
     public Car getCar(@RequestParam("id") int id) {
         return CarRepository.getCar(id);
@@ -28,16 +27,16 @@ public class CarController {
 
     @RequestMapping(value="/car/insert", method = POST)
     public Car insertCar(
-            @RequestBody() InsertCarDTO obj
-    ) {
+            @RequestBody() DTOInsertCar obj
+    ) throws IOException {
         return CarRepository.insertCar(obj.brand, obj.model, obj.color);
     }
 
     @RequestMapping(value="/car/insertId", method = POST)
-    public Car insertCar(
-            @RequestBody() AddCarDTO obj
+    public Car insertCarId(
+            @RequestBody() DTOInsertCar obj
     ) {
-        return CarRepository.insertCar(obj.brand, obj.model, obj.color);
+        return CarRepository.insertCar(obj.brandId, obj.model, obj.color);
     }
 
     @RequestMapping(value="/car/remove", method = DELETE)
@@ -47,13 +46,15 @@ public class CarController {
         CarRepository.removeCarById(obj.getId());
     }
 
+    // PATCH: Atualiza um atributo do objeto
     @RequestMapping(value="/car/update", method = PATCH)
     public void updateCar(
-            @RequestBody() UpdateDataDTO obj
+            @RequestBody() DTOUpdateAttrib obj
     ) {
         CarRepository.updateCar(obj.id, obj.attribName, obj.attribValue);
     }
 
+    // PUT: Atualiza o objeto inteiro
     @RequestMapping(value="/car/modify/{id}/{brandId}/{brandName}/{model}/{color}", method = PUT)
     public void modifyCar(
             @PathVariable("id") int id,

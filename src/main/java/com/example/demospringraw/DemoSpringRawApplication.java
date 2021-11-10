@@ -1,16 +1,23 @@
 package com.example.demospringraw;
 
 import com.example.demospringraw.repository.BrandRepository;
-import com.example.demospringraw.repository.CarRepository;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.http.ResponseEntity;
+
+import java.io.IOException;
 
 @SpringBootApplication
 public class DemoSpringRawApplication {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		SpringApplication.run(DemoSpringRawApplication.class, args);
-		String brandName1 = "Toyota";
+
+		// Imprimir array direto
+		// System.out.println(Arrays.toString("data"));
+		// Retorna erro
+		// ResponseEntity.status(400, "");
+		/*String brandName1 = "Toyota";
 		String brandName2 = "Honda";
 		String brandName3 = "Nissan";
 		String brandName4 = "Volkswagen";
@@ -42,6 +49,9 @@ public class DemoSpringRawApplication {
 		CarRepository.insertCar("Lamborghini", "Murcielago", "yellow");
 		CarRepository.insertCar("Ferrari", "Maranello", "red ferrari");
 		CarRepository.insertCar("Fiat", "Uno", "massa corrida");
+*/
+
+		BrandRepository.loadSavedBrands();
 
 	}
 

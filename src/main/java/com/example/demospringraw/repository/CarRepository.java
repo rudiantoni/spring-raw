@@ -3,6 +3,7 @@ package com.example.demospringraw.repository;
 import com.example.demospringraw.entity.Brand;
 import com.example.demospringraw.entity.Car;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class CarRepository {
@@ -28,13 +29,16 @@ public class CarRepository {
     }
 
     // OK Inserir Carro com o nome e inserir brand se nao existir o nome
-    public static Car insertCar(String brandName, String model, String color) {
+    public static Car insertCar(String brandName, String model, String color) throws IOException {
         int registerBrandId;
 
         if (!BrandRepository.brandExists(brandName)) {
             // Adicionar um novo objeto Brand caso não exista nenhum com o brandName passado
 
-            registerBrandId = BrandRepository.insertBrand(brandName).getId();
+            //registerBrandId = BrandRepository.insertBrand(brandName).getId();
+            Brand newBrand = new Brand(brandName);
+            registerBrandId = BrandRepository.insertBrand(newBrand).getId();
+
         } else {
             registerBrandId = BrandRepository.getBrand(brandName).getId();
         }
