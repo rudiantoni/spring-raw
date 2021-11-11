@@ -1,6 +1,7 @@
 package com.example.demospringraw.repository;
 
-import com.example.demospringraw.dao.FileMgmt;
+import com.example.demospringraw.dao.DAOBrand;
+import com.example.demospringraw.dao.DAOMain;
 import com.example.demospringraw.dto.DTOUpdateAttrib;
 import com.example.demospringraw.entity.Brand;
 
@@ -17,8 +18,8 @@ public class BrandRepository {
     // insertBrand(brand, true) salva no BD
     // insertBrand(brand, false) não salva no BD
     public static Brand insertBrand(Brand brand, boolean saveOnDatabase) throws Exception {
-        if (brand.getDescription() == null) {
-            String errMsg = "Invalid brand description. Brand insert aborted.";
+        if (brand == null || brand.getDescription() == null) {
+            String errMsg = "Invalid brand or brand description. Brand insert aborted.";
             System.out.println(errMsg);
 
             throw new Exception(errMsg);
@@ -62,7 +63,7 @@ public class BrandRepository {
         brandsList.add(newBrand);
 
         if (saveOnDatabase) {
-            FileMgmt.saveBrand(newBrand);
+            DAOBrand.saveBrand(newBrand);
         }
 
         nextBrandId = newBrand.getId() + 1;
@@ -90,7 +91,7 @@ public class BrandRepository {
             brandsList.remove(removeId);
 
             if(saveOnDatabase) {
-                FileMgmt.saveBrands(brandsList);
+                DAOBrand.saveBrands(brandsList);
             }
         } else {
             String errMsg = "Brand with id " + id + " not found. Brand remove aborted.";
@@ -167,7 +168,7 @@ public class BrandRepository {
             System.out.println("Brand updated successfully: id: " + brand.getId() +
                     " attribute name: " + updateObj.attribName + " attribute value: " + updateObj.attribValue);
             if (saveOnDatabase) {
-                FileMgmt.saveBrands(brandsList);
+                DAOBrand.saveBrands(brandsList);
             }
 
             return brand;
@@ -209,7 +210,7 @@ public class BrandRepository {
                     " description: " + modifyBrand.getDescription() + ".");
 
             if (saveOnDatabase) {
-                FileMgmt.saveBrands(brandsList);
+                DAOBrand.saveBrands(brandsList);
             }
 
             return modifyBrand;
@@ -219,16 +220,14 @@ public class BrandRepository {
 
     public static void loadSavedBrands() throws Exception {
 
-        ArrayList<ArrayList<String>> savedBrands = FileMgmt.getSavedBrands();
+        ArrayList<Brand> savedBrandsList = DAOBrand.getSavedBrandsList();
 
-        if (savedBrands == null) return;
-
-        for (ArrayList<String> rowData: savedBrands) {
-            int id = Integer.parseInt(rowData.get(FileMgmt.BRAND_COLUMN_ID));
-            String description = rowData.get(FileMgmt.BRAND_COLUMN_DESCRIPTION);
-
-            Brand brand = new Brand(id, description);
-            insertBrand(brand, false);
+        if(savedBrandsList != null) {
+            for (Brand brand: savedBrandsList) {
+                insertBrand(brand, false);
+            }
         }
+
     }
+
 }

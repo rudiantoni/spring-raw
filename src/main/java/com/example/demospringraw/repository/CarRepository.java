@@ -1,7 +1,10 @@
 package com.example.demospringraw.repository;
 
-import com.example.demospringraw.dao.FileMgmt;
+import com.example.demospringraw.dao.DAOBrand;
+import com.example.demospringraw.dao.DAOCar;
+import com.example.demospringraw.dao.DAOMain;
 import com.example.demospringraw.dto.DTOUpdateAttrib;
+import com.example.demospringraw.entity.Brand;
 import com.example.demospringraw.entity.Car;
 
 import java.util.ArrayList;
@@ -16,8 +19,8 @@ public class CarRepository {
     }
 
     public static Car insertCar(Car car, boolean saveOnDatabase, boolean isLoading) throws Exception {
-        if (car.getBrandId() == Car.CAR_NO_BRANDID || car.getModel() == null || car.getColor() == null) {
-            String errMsg = "Invalid sent attributes. Attributes brandId, model and color are required. Car insert aborted.";
+        if (car == null || car.getBrandId() == Car.CAR_NO_BRANDID || car.getModel() == null || car.getColor() == null) {
+            String errMsg = "Invalid car or sent attributes. Attributes brandId, model and color are required. Car insert aborted.";
 
             System.out.println(errMsg);
             throw new Exception(errMsg);
@@ -70,7 +73,7 @@ public class CarRepository {
         carsList.add(newCar);
 
         if (saveOnDatabase) {
-            FileMgmt.saveCar(newCar);
+            DAOCar.saveCar(newCar);
         }
 
         nextCarId = newCar.getId() + 1;
@@ -99,7 +102,7 @@ public class CarRepository {
             carsList.remove(removeId);
 
             if(saveOnDatabase) {
-                FileMgmt.saveCars(carsList);
+                DAOCar.saveCars(carsList);
             }
         } else {
             String errMsg = "Car with id " + id + " not found. Car remove aborted.";
@@ -192,7 +195,7 @@ public class CarRepository {
                 " attribute name: " + updateObj.attribName + " attribute value: " + updateObj.attribValue + ".");
 
         if (saveOnDatabase){
-            FileMgmt.saveCars(carsList);
+            DAOCar.saveCars(carsList);
         }
 
         return car;
@@ -202,6 +205,7 @@ public class CarRepository {
     public static Car modifyCar(int id, Car car) throws Exception {
         return modifyCar(id, car, true);
     }
+
     public static Car modifyCar(int id, Car car, boolean saveOnDatabase) throws Exception {
         Car modifyCar = getCar(id);
 
@@ -234,7 +238,7 @@ public class CarRepository {
                     " color: " + modifyCar.getColor() + ".");
 
             if (saveOnDatabase) {
-                FileMgmt.saveCars(carsList);
+                DAOCar.saveCars(carsList);
             }
 
             return modifyCar;
@@ -245,19 +249,12 @@ public class CarRepository {
 
     public static void loadSavedCars() throws Exception {
 
-        ArrayList<ArrayList<String>> savedCars = FileMgmt.getSavedCars();
+        ArrayList<Car> savedCarsList = DAOCar.getSavedCarsList();
 
-        if (savedCars == null) return;
-
-        for (ArrayList<String> rowData: savedCars) {
-
-            int id = Integer.parseInt(rowData.get(FileMgmt.CAR_COLUMN_ID));
-            int brandId = Integer.parseInt(rowData.get(FileMgmt.CAR_COLUMN_BRANDID));
-            String model = rowData.get(FileMgmt.CAR_COLUMN_MODEL);
-            String color = rowData.get(FileMgmt.CAR_COLUMN_COLOR);
-
-            Car car = new Car(id, brandId, model, color);
-            insertCar(car, false, true);
+        if (savedCarsList != null) {
+            for (Car car: savedCarsList) {
+                insertCar(car, false, true);
+            }
         }
     }
 }

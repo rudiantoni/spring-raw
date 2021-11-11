@@ -6,14 +6,16 @@ public class Brand {
     private int id = BRAND_NO_ID;
     private String description;
 
+    // NÃO REMOVER
     public Brand () {}
 
-    public Brand(int id, String description) {
-        this.id = id;
+    // NÃO REMOVER
+    public Brand(String description) {
         this.description = description;
     }
 
-    public Brand(String description) {
+    public Brand(int id, String description) {
+        this.id = id;
         this.description = description;
     }
 
@@ -28,4 +30,10 @@ public class Brand {
     public void setDescription(String description){
         this.description = description;
     }
+
+    @Override
+    public String toString() {
+        return "id: " + this.id + " description: " +this.description;
+    }
+
 }

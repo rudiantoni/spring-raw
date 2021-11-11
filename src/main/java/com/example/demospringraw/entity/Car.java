@@ -10,16 +10,18 @@ public class Car {
     private String model;
     private String color;
 
+    // NÃO REMOVER
     public Car(){}
 
-    public Car(int id, int brandId, String model, String color) {
-        this.id = id;
+    // NÃO REMOVER
+    public Car(int brandId, String model, String color) {
         this.brandId = brandId;
         this.model = model;
         this.color = color;
     }
 
-    public Car(int brandId, String model, String color) {
+    public Car(int id, int brandId, String model, String color) {
+        this.id = id;
         this.brandId = brandId;
         this.model = model;
         this.color = color;
@@ -53,4 +55,8 @@ public class Car {
         this.color = color;
     }
 
+    @Override
+    public String toString(){
+        return "id: " + this.id + " brandId: " +this.brandId+ " + model: " + this.model + " color: " +this.color;
+    }
 }
