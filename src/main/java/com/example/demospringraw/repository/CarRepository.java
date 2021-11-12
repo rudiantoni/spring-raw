@@ -1,10 +1,7 @@
 package com.example.demospringraw.repository;
 
-import com.example.demospringraw.dao.DAOBrand;
 import com.example.demospringraw.dao.DAOCar;
-import com.example.demospringraw.dao.DAOMain;
 import com.example.demospringraw.dto.DTOUpdateAttrib;
-import com.example.demospringraw.entity.Brand;
 import com.example.demospringraw.entity.Car;
 
 import java.util.ArrayList;
@@ -85,6 +82,10 @@ public class CarRepository {
         return newCar;
     }
 
+    public static void removeCarById(int id) throws Exception {
+        removeCarById(id, true);
+    }
+
     public static void removeCarById(int id, boolean saveOnDatabase) throws Exception {
 
         int removeId = -1;
@@ -110,10 +111,6 @@ public class CarRepository {
 
             throw new Exception(errMsg);
         }
-    }
-
-    public static void removeCarById(int id) throws Exception {
-        removeCarById(id, true);
     }
 
     public static ArrayList<Car> getCarsList() {

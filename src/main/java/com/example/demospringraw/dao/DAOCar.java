@@ -1,6 +1,5 @@
 package com.example.demospringraw.dao;
 
-import com.example.demospringraw.entity.Brand;
 import com.example.demospringraw.entity.Car;
 
 import java.io.IOException;

@@ -1,7 +1,6 @@
 package com.example.demospringraw.repository;
 
 import com.example.demospringraw.dao.DAOBrand;
-import com.example.demospringraw.dao.DAOMain;
 import com.example.demospringraw.dto.DTOUpdateAttrib;
 import com.example.demospringraw.entity.Brand;
 
@@ -17,6 +16,10 @@ public class BrandRepository {
     // insertBrand(brand) salva no BD
     // insertBrand(brand, true) salva no BD
     // insertBrand(brand, false) não salva no BD
+    public static Brand insertBrand(Brand brand) throws Exception {
+        return insertBrand(brand, true);
+    }
+
     public static Brand insertBrand(Brand brand, boolean saveOnDatabase) throws Exception {
         if (brand == null || brand.getDescription() == null) {
             String errMsg = "Invalid brand or brand description. Brand insert aborted.";
@@ -73,8 +76,8 @@ public class BrandRepository {
         return newBrand;
     }
 
-    public static Brand insertBrand(Brand brand) throws Exception {
-        return insertBrand(brand, true);
+    public static void removeBrandById(int id) throws Exception {
+        removeBrandById(id, true);
     }
 
     public static void removeBrandById(int id, boolean saveOnDatabase) throws Exception {
@@ -100,10 +103,6 @@ public class BrandRepository {
             throw new Exception(errMsg);
         }
 
-    }
-
-    public static void removeBrandById(int id) throws Exception {
-        removeBrandById(id, true);
     }
 
     public static ArrayList<Brand> getBrandsList(){
